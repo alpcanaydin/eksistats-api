@@ -17,19 +17,23 @@ const body = {
           index: 'not_analyzed',
           fielddata: true,
         },
+        topicStems: {
+          type: 'text',
+          index: 'not_analyzed',
+          fielddata: true,
+        },
         author: {
-          properties: {
-            id: { type: 'string' },
-            user: {
-              type: 'string',
-              index: 'not_analyzed',
-            },
-          },
+          type: 'string',
+          index: 'not_analyzed',
         },
         createdAt: { type: 'date' },
         favorites: { type: 'integer' },
-        comments: { type: 'integer' },
         text: {
+          type: 'text',
+          index: 'not_analyzed',
+          fielddata: true,
+        },
+        textStems: {
           type: 'text',
           index: 'not_analyzed',
           fielddata: true,
