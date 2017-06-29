@@ -9,7 +9,7 @@ const main = async () => {
 
   const START_ENTRY = parseInt(process.argv[2], 10) || 1;
   const FINISH_ENTRY = parseInt(process.argv[3], 10) || parseInt(process.env.TOTAL_ENTRY, 10);
-  const THRESHOLD = 50;
+  const THRESHOLD = 100;
 
   const parallel = (start, finish, total) => {
     const promises = [];
