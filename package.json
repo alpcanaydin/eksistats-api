@@ -10,9 +10,11 @@
     "dotenv": "^4.0.0",
     "elasticsearch": "^13.2.0",
     "express": "^4.15.3",
+    "java": "^0.8.0",
     "moment": "^2.18.1",
     "request": "^2.81.0",
-    "request-promise": "^4.2.1"
+    "request-promise": "^4.2.1",
+    "uuid": "^3.1.0"
   },
   "devDependencies": {
     "eslint": "^3.19.0",

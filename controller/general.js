@@ -6,17 +6,41 @@ module.exports = async (req, res) => {
   const response = await esSearch(
     {},
     {
+      totalTopic: {
+        value_count: {
+          field: 'topicStems',
+        },
+      },
+
+      uniqueTopic: {
+        cardinality: {
+          field: 'topicStems',
+        },
+      },
+
       mostTopic: {
         terms: {
-          field: 'topic',
+          field: 'topicStems',
           size: 100,
           exclude: EXCLUDE,
         },
       },
 
+      totalText: {
+        value_count: {
+          field: 'entries.textStems',
+        },
+      },
+
+      uniqueText: {
+        cardinality: {
+          field: 'entries.textStems',
+        },
+      },
+
       mostText: {
         terms: {
-          field: 'text',
+          field: 'entries.textStems',
           size: 100,
           exclude: EXCLUDE,
         },

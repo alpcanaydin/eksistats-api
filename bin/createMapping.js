@@ -10,8 +10,6 @@ const body = {
   mappings: {
     [process.env.ES_TYPE]: {
       properties: {
-        id: { type: 'string' },
-        url: { type: 'string' },
         topic: {
           type: 'text',
           index: 'not_analyzed',
@@ -22,21 +20,27 @@ const body = {
           index: 'not_analyzed',
           fielddata: true,
         },
-        author: {
-          type: 'string',
-          index: 'not_analyzed',
-        },
-        createdAt: { type: 'date' },
-        favorites: { type: 'integer' },
-        text: {
-          type: 'text',
-          index: 'not_analyzed',
-          fielddata: true,
-        },
-        textStems: {
-          type: 'text',
-          index: 'not_analyzed',
-          fielddata: true,
+        entries: {
+          properties: {
+            author: {
+              type: 'string',
+              index: 'not_analyzed',
+            },
+            createdAt: { type: 'date' },
+            text: {
+              type: 'text',
+              index: 'not_analyzed',
+              fielddata: true,
+            },
+            textStems: {
+              type: 'text',
+              index: 'not_analyzed',
+              fielddata: true,
+            },
+            favories: {
+              type: 'integer',
+            },
+          },
         },
       },
     },
