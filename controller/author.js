@@ -6,9 +6,9 @@ const EXCLUDE = require('../analysis/stop-words.json');
 module.exports = async (req, res) => {
   const entries = req.db.get('entries');
 
-  const topic = req.query.topic;
+  const author = req.query.author;
 
-  if (!topic) {
+  if (!author) {
     res.json({
       mostUsedEntryWords: [],
       totalUsedEntryWords: 0,
@@ -20,7 +20,7 @@ module.exports = async (req, res) => {
   const mostUsedEntryWordsPromise = await entries.aggregate([
     {
       $match: {
-        topic,
+        author,
         stems: { $nin: EXCLUDE },
       },
     },
@@ -33,7 +33,7 @@ module.exports = async (req, res) => {
   const totalUsedEntryWordsPromise = await entries.aggregate([
     {
       $match: {
-        topic,
+        author,
       },
     },
     { $unwind: '$stems' },

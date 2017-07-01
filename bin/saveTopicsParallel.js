@@ -59,6 +59,7 @@ const main = async () => {
   topics.createIndex('title');
   topics.createIndex('stems');
   await parallel(START_ENTRY, START_ENTRY + THRESHOLD, FINISH_ENTRY);
+  db.close();
 };
 
 main();
