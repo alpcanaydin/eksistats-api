@@ -10,19 +10,14 @@ api:
     - VIRTUAL_HOST=api.eksiapi.dev
     - VIRTUAL_PORT=8080
   links:
-    - elasticsearch
+    - mongodb
 server:
   image: jwilder/nginx-proxy
   volumes:
     - /var/run/docker.sock:/tmp/docker.sock
   ports:
     - "80:80"
-elasticsearch:
-  image: elasticsearch:latest
-  environment:
-    - network.host=0.0.0.0
-    - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-  mem_limit: 1g
+mongodb:
+  image: mongo:latest
   ports:
-    - "9200:9200"
-    - "9300:9300"
+    - "27017:27017"
