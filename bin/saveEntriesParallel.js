@@ -2,7 +2,6 @@ const dotenv = require('dotenv');
 const elastic = require('elasticsearch');
 const uuidv1 = require('uuid/v1');
 
-const Stemmer = require('../lib/stemmer');
 const getEntry = require('../lib/getEntry');
 
 // Dotenv config
@@ -15,8 +14,6 @@ const main = async () => {
   const FINISH_ENTRY = parseInt(process.argv[3], 10) || parseInt(process.env.TOTAL_ENTRY, 10);
   const THRESHOLD = 100;
 
-  const stemmer = new Stemmer();
-
   const client = new elastic.Client({
     host: process.env.ES_HOST,
   });
@@ -26,7 +23,7 @@ const main = async () => {
 
     for (let x = start; x <= finish; x += 1) {
       // eslint-disable-next-line
-      const entry = await getEntry(x, stemmer);
+      const entry = await getEntry(x);
 
       if (entry) {
         body.push({

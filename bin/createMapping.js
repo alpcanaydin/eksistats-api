@@ -15,11 +15,6 @@ const body = {
           index: 'not_analyzed',
           fielddata: true,
         },
-        stems: {
-          type: 'text',
-          index: 'not_analyzed',
-          fielddata: true,
-        },
       },
     },
     entries: {
@@ -32,11 +27,6 @@ const body = {
         },
         createdAt: { type: 'date' },
         text: {
-          type: 'text',
-          index: 'not_analyzed',
-          fielddata: true,
-        },
-        stems: {
           type: 'text',
           index: 'not_analyzed',
           fielddata: true,
