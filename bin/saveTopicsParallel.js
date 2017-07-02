@@ -29,7 +29,7 @@ const main = async () => {
           update: {
             _index: process.env.ES_INDEX,
             _type: 'topics',
-            _id: topic.title,
+            _id: topic.topic,
           },
         });
         body.push({
