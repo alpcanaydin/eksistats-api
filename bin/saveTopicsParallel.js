@@ -1,5 +1,5 @@
 const dotenv = require('dotenv');
-const monk = require('monk');
+const elastic = require('elasticsearch');
 
 const Stemmer = require('../lib/stemmer');
 const getTopic = require('../lib/getTopic');
@@ -10,41 +10,42 @@ dotenv.config();
 const main = async () => {
   console.log('Started to fetching...');
 
-  const db = monk(`${process.env.MONGO_HOST}/${process.env.MONGO_DB}`);
-  const topics = db.get('topics');
-
   const START_ENTRY = parseInt(process.argv[2], 10) || 1;
   const FINISH_ENTRY = parseInt(process.argv[3], 10) || parseInt(process.env.TOTAL_ENTRY, 10);
   const THRESHOLD = 100;
 
   const stemmer = new Stemmer();
 
+  const client = new elastic.Client({
+    host: process.env.ES_HOST,
+  });
+
   const parallel = async (start, finish, total) => {
-    const operations = [];
+    const body = [];
 
     for (let x = start; x <= finish; x += 1) {
       // eslint-disable-next-line
       const topic = await getTopic(x, stemmer);
 
       if (topic) {
-        operations.push({
-          updateOne: {
-            filter: { title: topic.title },
-            update: topic,
-            upsert: true,
+        body.push({
+          update: {
+            _index: process.env.ES_INDEX,
+            _type: 'topics',
+            _id: topic.title,
           },
+        });
+        body.push({
+          doc: topic,
+          doc_as_upsert: true,
         });
       }
     }
 
-    if (!operations.length) {
-      return true;
-    }
+    console.log(`${start}-${FINISH_ENTRY} finished.`);
 
-    console.log(`${finish}-${FINISH_ENTRY} finished.`);
-
-    return topics
-      .bulkWrite(operations)
+    return client
+      .bulk({ body })
       .then(() => {
         if (finish + THRESHOLD > total) {
           return true;
@@ -57,10 +58,7 @@ const main = async () => {
       });
   };
 
-  topics.createIndex('title');
-  topics.createIndex('stems');
   await parallel(START_ENTRY, START_ENTRY + THRESHOLD, FINISH_ENTRY);
-  db.close();
 };
 
 main();

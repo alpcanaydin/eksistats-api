@@ -1,10 +1,11 @@
+const elastic = require('elasticsearch');
 const aggregationToWord = require('../lib/aggregationToWord');
 const aggregationToCount = require('../lib/aggregationToCount');
 
 const EXCLUDE = require('../analysis/stop-words.json');
 
 module.exports = async (req, res) => {
-  const entries = req.db.get('entries');
+  const client = new elastic.Client({ host: process.env.ES_HOST });
 
   const author = req.query.author;
 
@@ -17,38 +18,36 @@ module.exports = async (req, res) => {
     return;
   }
 
-  const mostUsedEntryWordsPromise = await entries.aggregate([
-    {
-      $match: {
-        author,
-        stems: { $nin: EXCLUDE },
+  const query = {
+    term: { author },
+  };
+
+  const aggs = {
+    mostUsedEntryWords: {
+      terms: {
+        field: 'stems',
+        size: 1000,
+        exclude: EXCLUDE,
       },
     },
-    { $unwind: '$stems' },
-    { $group: { _id: '$stems', count: { $sum: 1 } } },
-    { $sort: { count: -1 } },
-    { $limit: 1000 },
-  ]);
 
-  const totalUsedEntryWordsPromise = await entries.aggregate([
-    {
-      $match: {
-        author,
+    totalUsedEntryWords: {
+      value_count: {
+        field: 'stems',
       },
     },
-    { $unwind: '$stems' },
-    { $group: { _id: '$_id', sum: { $sum: 1 } } },
-    { $group: { _id: null, total: { $sum: '$sum' } } },
-  ]);
+  };
 
-  const [mostUsedEntryWords, totalUsedEntryWords] = await Promise.all([
-    mostUsedEntryWordsPromise,
-    totalUsedEntryWordsPromise,
-  ]);
+  const response = await client.search({
+    index: process.env.ES_INDEX,
+    type: 'entries',
+    size: 0,
+    body: { query, aggs },
+  });
 
   res.json({
     author,
-    mostUsedEntryWords: aggregationToWord(mostUsedEntryWords),
-    totalUsedEntryWords: aggregationToCount(totalUsedEntryWords),
+    mostUsedEntryWords: aggregationToWord(response.aggregations.mostUsedEntryWords.buckets),
+    totalUsedEntryWords: aggregationToCount(response.aggregations.totalUsedEntryWords),
   });
 };

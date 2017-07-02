@@ -1,66 +1,81 @@
+const elastic = require('elasticsearch');
 const aggregationToWord = require('../lib/aggregationToWord');
 const aggregationToCount = require('../lib/aggregationToCount');
 
 const EXCLUDE = require('../analysis/stop-words.json');
 
 module.exports = async (req, res) => {
-  const topics = req.db.get('topics');
-  const entries = req.db.get('entries');
+  const client = new elastic.Client({ host: process.env.ES_HOST });
 
-  const totalTopicsPromise = topics.count();
+  const topicsAggs = {
+    mostUsedTopicWords: {
+      terms: {
+        field: 'stems',
+        size: 1000,
+        exclude: EXCLUDE,
+      },
+    },
 
-  const mostUsedTopicWordsPromise = topics.aggregate([
-    { $match: { stems: { $nin: EXCLUDE } } },
-    { $unwind: '$stems' },
-    { $group: { _id: '$stems', count: { $sum: 1 } } },
-    { $sort: { count: -1 } },
-    { $limit: 1000 },
-  ]);
+    totalUsedTopicWords: {
+      value_count: {
+        field: 'stems',
+      },
+    },
+  };
 
-  const totalUsedTopicWordsPromise = topics.aggregate([
-    { $unwind: '$stems' },
-    { $group: { _id: '$_id', sum: { $sum: 1 } } },
-    { $group: { _id: null, total: { $sum: '$sum' } } },
-  ]);
+  const entriesAggs = {
+    mostUsedEntryWords: {
+      terms: {
+        field: 'stems',
+        size: 1000,
+        exclude: EXCLUDE,
+      },
+    },
 
-  const totalEntriesPromise = entries.count();
+    totalUsedEntryWords: {
+      value_count: {
+        field: 'stems',
+      },
+    },
+  };
 
-  const mostUsedEntryWordsPromise = entries.aggregate([
-    { $match: { stems: { $nin: EXCLUDE } } },
-    { $unwind: '$stems' },
-    { $group: { _id: '$stems', count: { $sum: 1 } } },
-    { $sort: { count: -1 } },
-    { $limit: 1000 },
-  ]);
+  const totalTopicsPromise = client.count({
+    index: process.env.ES_INDEX,
+    type: 'topics',
+  });
 
-  const totalUsedEntryWordsPromise = entries.aggregate([
-    { $unwind: '$stems' },
-    { $group: { _id: '$_id', sum: { $sum: 1 } } },
-    { $group: { _id: null, total: { $sum: '$sum' } } },
-  ]);
+  const topicsResponsePromise = client.search({
+    index: process.env.ES_INDEX,
+    type: 'topics',
+    size: 0,
+    body: { aggs: topicsAggs },
+  });
 
-  const [
-    totalTopics,
-    mostUsedTopicWords,
-    totalUsedTopicWords,
-    totalEntries,
-    mostUsedEntryWords,
-    totalUsedEntryWords,
-  ] = await Promise.all([
+  const totalEntriesPromise = client.count({
+    index: process.env.ES_INDEX,
+    type: 'entries',
+  });
+
+  const entriesResponsePromise = client.search({
+    index: process.env.ES_INDEX,
+    type: 'entries',
+    size: 0,
+    body: { aggs: entriesAggs },
+  });
+
+  const [totalTopics, topicsResponse, totalEntries, entriesResponse] = await Promise.all([
     totalTopicsPromise,
-    mostUsedTopicWordsPromise,
-    totalUsedTopicWordsPromise,
+    topicsResponsePromise,
     totalEntriesPromise,
-    mostUsedEntryWordsPromise,
-    totalUsedEntryWordsPromise,
+    entriesResponsePromise,
   ]);
 
   res.json({
-    totalTopics,
-    mostUsedTopicWords: aggregationToWord(mostUsedTopicWords),
-    totalUsedTopicWords: aggregationToCount(totalUsedTopicWords),
-    totalEntries,
-    mostUsedEntryWords: aggregationToWord(mostUsedEntryWords),
-    totalUsedEntryWords: aggregationToCount(totalUsedEntryWords),
+    totalTopics: totalTopics.count,
+    mostUsedTopicWords: aggregationToWord(topicsResponse.aggregations.mostUsedTopicWords.buckets),
+    totalUsedTopicWords: aggregationToCount(topicsResponse.aggregations.totalUsedTopicWords),
+    totalEntries: totalEntries.count,
+    mostUsedEntryWords: aggregationToWord(entriesResponse.aggregations.mostUsedEntryWords.buckets),
+    totalUsedEntryWords: aggregationToCount(entriesResponse.aggregations.totalUsedEntryWords),
   });
 };
