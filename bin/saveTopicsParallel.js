@@ -24,7 +24,7 @@ const main = async () => {
       // eslint-disable-next-line
       const topic = await getTopic(x);
 
-      if (topic) {
+      if (topic && topic.topic) {
         body.push({
           update: {
             _index: process.env.ES_INDEX,
