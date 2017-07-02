@@ -19,7 +19,7 @@ const body = {
     },
     entries: {
       properties: {
-        topic: {
+        topicTitle: {
           type: 'keyword',
         },
         author: {

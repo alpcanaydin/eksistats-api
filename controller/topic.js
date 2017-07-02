@@ -20,7 +20,7 @@ module.exports = async (req, res) => {
   }
 
   const query = {
-    term: { topic },
+    term: { topicTitle: topic },
   };
 
   const aggs = {
