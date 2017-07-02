@@ -41,6 +41,8 @@ const main = async () => {
       return true;
     }
 
+    console.log(`${finish}-${FINISH_ENTRY} finished.`);
+
     return topics
       .bulkWrite(operations)
       .then(() => {
@@ -48,7 +50,6 @@ const main = async () => {
           return true;
         }
 
-        console.log(`${start}-${finish} finished.`);
         return parallel(finish, finish + THRESHOLD, total);
       })
       .catch(err => {
