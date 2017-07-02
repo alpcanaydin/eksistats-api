@@ -26,7 +26,7 @@ module.exports = async (req, res) => {
   const aggs = {
     mostUsedEntryWords: {
       terms: {
-        field: 'stems',
+        field: 'text',
         size: 10,
         exclude: EXCLUDE,
       },
@@ -34,7 +34,7 @@ module.exports = async (req, res) => {
 
     totalUsedEntryWords: {
       value_count: {
-        field: 'stems',
+        field: 'text',
       },
     },
   };
