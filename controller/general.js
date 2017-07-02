@@ -10,7 +10,7 @@ module.exports = async (req, res) => {
   const topicsAggs = {
     mostUsedTopicWords: {
       terms: {
-        field: 'title',
+        field: 'topic',
         size: 10,
         exclude: EXCLUDE,
       },
@@ -18,7 +18,7 @@ module.exports = async (req, res) => {
 
     totalUsedTopicWords: {
       value_count: {
-        field: 'title',
+        field: 'topic',
       },
     },
   };
