@@ -19,7 +19,11 @@ const body = {
     },
     entries: {
       properties: {
-        topicTitle: {
+        topic: {
+          type: 'text',
+          fielddata: true,
+        },
+        exactTopic: {
           type: 'keyword',
         },
         author: {

@@ -8,7 +8,6 @@ module.exports = async (req, res) => {
   const client = new elastic.Client({ host: process.env.ES_HOST });
 
   const topic = req.query.topic;
-  console.log(topic);
 
   if (!topic) {
     res.json({
@@ -20,7 +19,7 @@ module.exports = async (req, res) => {
   }
 
   const query = {
-    term: { topicTitle: topic },
+    term: { exactTopic: topic },
   };
 
   const aggs = {
