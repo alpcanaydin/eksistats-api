@@ -25,13 +25,10 @@ const body = {
     entries: {
       properties: {
         topic: {
-          type: 'text',
-          index: 'not_analyzed',
-          fielddata: true,
+          type: 'keyword',
         },
         author: {
-          type: 'string',
-          index: 'not_analyzed',
+          type: 'keyword',
         },
         createdAt: { type: 'date' },
         text: {
