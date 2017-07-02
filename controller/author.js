@@ -27,7 +27,7 @@ module.exports = async (req, res) => {
     { $unwind: '$stems' },
     { $group: { _id: '$stems', count: { $sum: 1 } } },
     { $sort: { count: -1 } },
-    { $limit: 100 },
+    { $limit: 1000 },
   ]);
 
   const totalUsedEntryWordsPromise = await entries.aggregate([
@@ -47,6 +47,7 @@ module.exports = async (req, res) => {
   ]);
 
   res.json({
+    author,
     mostUsedEntryWords: aggregationToWord(mostUsedEntryWords),
     totalUsedEntryWords: aggregationToCount(totalUsedEntryWords),
   });
