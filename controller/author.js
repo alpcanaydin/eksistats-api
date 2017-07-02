@@ -26,7 +26,7 @@ module.exports = async (req, res) => {
     mostUsedEntryWords: {
       terms: {
         field: 'stems',
-        size: 1000,
+        size: 10,
         exclude: EXCLUDE,
       },
     },
